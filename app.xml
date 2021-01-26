@@ -3,7 +3,7 @@
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
   <jar>D:\Code\Java\ChangeMyWallPagePlz\ChangeMyWallpaperPlz.jar</jar>
-  <outfile>D:\Code\Java\ChangeMyWallPagePlz\ChangeMyWallpaperPlz.exe</outfile>
+  <outfile>D:\Code\Java\ChangeMyWallPagePlz\ChangeMyWallPagePlz.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
