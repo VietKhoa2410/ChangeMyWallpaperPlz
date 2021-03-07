@@ -1,14 +1,13 @@
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.List;
 
-import org.json.simple.JSONArray;
+import org.apache.commons.io.FileUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
@@ -16,24 +15,23 @@ import org.json.simple.parser.JSONParser;
 
 public class Config {
 	private String path;
-	private String sourceFileName;
-	private String sourceFilePath;
-	private String storageFolder;
-	private String storagePath;
-	private Set<String> urlSet = new HashSet<String>();
-	private Set<String> imgLinkSet = new HashSet<String>();
-	private int sourceFileRenewEvery, wallpaperRenewEvery;
+	private String imageFolder;
+	private String libraryFilePath;
+	private String imageSourcePath;
+	private int libraryRenewEvery, wallpaperRenewEvery;
 
 	/***** CONSTRUCTOR *****/
 	public Config() {
 		Path currentPath = Paths.get("");
-		path = currentPath.toAbsolutePath().toString()+"\\ChangeMyWallpaperPlz";
+		path = currentPath.toAbsolutePath().toString()+"\\ChangeMyWallpaperPlz\\";
 
 		loadConfigFile();
 
-		storagePath = path + "\\" + storageFolder + "\\";
-		sourceFilePath = path + "\\" + sourceFileName + "\\";
+		libraryFilePath = path + "library.txt";
+		imageSourcePath=path+"imageSource.txt";
 	}
+
+	
 
 	/***** METHOD *****/
 
@@ -46,33 +44,20 @@ public class Config {
 				f.mkdir();
 			}
 			
-			f=new File(path + "/config.json");
+			f=new File(path + "config.json");
 			if(!f.exists()) {
 				createDefaultConfigFile();
 			}
 			
 			JSONParser parser = new JSONParser();
-			Object obj = parser.parse(new FileReader(path + "/config.json"));
+			Object obj = parser.parse(new FileReader(path + "config.json"));
 
 			
 			JSONObject jsonObject = (JSONObject) obj;
 
-			this.storageFolder = (String) jsonObject.get("Storage Folder");
-			
-			this.sourceFileName = (String) jsonObject.get("Source File");
-			
-			this.sourceFileRenewEvery=Integer.parseInt((String)jsonObject.get("Source File Renew Every"));
-			
+			this.imageFolder = (String) jsonObject.get("Image Folder");
+			this.libraryRenewEvery=Integer.parseInt((String)jsonObject.get("Library Renew Every"));
 			this.wallpaperRenewEvery=Integer.parseInt((String)jsonObject.get("Wallpaper Renew Every"));
-
-			// A JSON array. JSONObject supports java.util.List interface
-			JSONArray companyList = (JSONArray) jsonObject.get("Reddit URL");
-
-			Iterator<JSONObject> iterator = companyList.iterator();
-			while (iterator.hasNext()) {
-				Object url = (Object) iterator.next();
-				urlSet.add(url.toString());
-			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -81,19 +66,13 @@ public class Config {
 	@SuppressWarnings("unchecked")
 	public void createDefaultConfigFile() {
 		JSONObject obj = new JSONObject();
-		obj.put("Storage Folder", "img");
-        obj.put("Source File", "imageLink.txt");
-        obj.put("Source File Renew Every", "3600000");
+		obj.put("Image Folder", "D:\\ChangeMyWallpaperPlz");
+        obj.put("Library Renew Every", "3600000");
         obj.put("Wallpaper Renew Every", "5000");
-        
-        JSONArray url = new JSONArray();
-        url.add("https://www.reddit.com/r/wallpaper");
-        url.add("https://www.reddit.com/r/food");
-        obj.put("Reddit URL", url);
-        
+              
         FileWriter fw=null;
         try {
-        	 fw= new FileWriter(path+"\\config.json");
+        	 fw= new FileWriter(path+"config.json");
         	fw.write(obj.toJSONString());
         }catch(Exception e) {
         	e.printStackTrace();
@@ -107,42 +86,53 @@ public class Config {
 		}
 	}
 
+	public void offlineMode() {
+		libraryFilePath = path + "offLibrary.txt";
+		
+		BufferedWriter writer;
+		try {
+			writer = new BufferedWriter(new FileWriter(libraryFilePath));
+			File dir =new File(imageFolder);
+			String[] extensions = new String[] { "png", "jpg" };
+			List<File> files = (List<File>) FileUtils.listFiles(dir, extensions, true);
+			for (File file : files) {
+				writer.write(file.getName()+"\n");
+			}
+			
+			writer.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	/***** GETTER *****/
 
-	public String getStorageFolder() {
-		return storageFolder;
+	public String getImageFolder() {
+		return imageFolder;
+	}
+	
+	public String getImageFolderPath() {
+		return imageFolder+"\\";
 	}
 
 	public String getPath() {
 		return path;
 	}
 
-	public String getStoragePath() {
-		return storagePath;
-	}
-
-	public String getSourceFilePath() {
-		return sourceFilePath;
-	}
-
-	public Set<String> getUrlSet() {
-		return urlSet;
-	}
-
-	public Set<String> getImgLinkSet() {
-		return imgLinkSet;
-	}
-
-	public void setImgLinkSet(Set<String> imgSet) {
-		this.imgLinkSet = imgSet;
-	}
-
-	public int getSourceFileRenewEvery() {
-		return sourceFileRenewEvery;
+	public int getLibraryRenewEvery() {
+		return libraryRenewEvery;
 	}
 
 	public int getWallpaperRenewEvery() {
 		return wallpaperRenewEvery;
 	}
 
+	public String getLibraryFilePath() {
+		return libraryFilePath;
+	}
+	
+	
+	public String getImageSourcePath() {
+		return imageSourcePath;
+	}
 }
